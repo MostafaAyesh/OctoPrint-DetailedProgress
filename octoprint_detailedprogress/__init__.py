@@ -45,7 +45,7 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 			currentData = self._sanitize_current_data(currentData)
 
 			currentJob = self._printer.get_current_job()
-			fileName = currentJob["file"]["name"]
+			filename = currentJob["file"]["name"]
 
 			message = self._get_next_message(currentData, filename)
 			self._printer.commands("M117 {}".format(message))
