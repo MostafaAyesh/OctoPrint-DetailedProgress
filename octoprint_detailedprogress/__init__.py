@@ -44,7 +44,10 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 			currentData = self._printer.get_current_data()
 			currentData = self._sanitize_current_data(currentData)
 
-			message = self._get_next_message(currentData)
+			currentJob = self._printer.get_current_job()
+			fileName = currentJob["file"]["name"]
+
+			message = self._get_next_message(currentData, filename)
 			self._printer.commands("M117 {}".format(message))
 		except Exception as e:
 			self._logger.info("Caught an exception {0}\nTraceback:{1}".format(e,traceback.format_exc()))
@@ -85,7 +88,7 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 
 		return currentData
 
-	def _get_next_message(self, currentData):
+	def _get_next_message(self, currentData, filename):
 		message = self._messages[self._last_message]
 		self._last_message += 1
 		if (self._last_message >= len(self._messages)):
@@ -96,6 +99,7 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 			ETA = currentData["progress"]["ETA"],
 			filepos = currentData["progress"]["filepos"],
 			accuracy = currentData["progress"]["accuracy"],
+			filename = filename,
 		)
 
 	def _get_time_from_seconds(self, seconds):
