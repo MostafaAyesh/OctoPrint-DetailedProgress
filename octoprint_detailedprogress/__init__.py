@@ -7,7 +7,6 @@ import octoprint.plugin
 import octoprint.util
 import traceback
 from octoprint.events import Events
-from os import splitext
 
 class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
                              octoprint.plugin.SettingsPlugin):
@@ -43,7 +42,7 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 			currentData = self._sanitize_current_data(currentData)
 
 			currentJob = self._printer.get_current_job()
-			filename = splitext(currentJob["file"]["name"])[0] # Remove file extension
+			filename = ".".join(currentJob["file"]["name"].split(".")[:-1]) # Remove file extension
 
 			message = self._get_next_message(currentData, filename)
 			self._printer.commands("M117 {}".format(message))
@@ -110,6 +109,7 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 			minutes = int(seconds / 60)
 			seconds = seconds % 60
 		return self._etl_format.format(**locals())
+
 
 	##~~ Settings
 
