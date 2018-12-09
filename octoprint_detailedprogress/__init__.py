@@ -16,6 +16,7 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 	_etl_format = ""
 	_eta_strftime = ""
 	_connected_message = ""
+	_done_message = ""
 	_messages = []
 	def on_event(self, event, payload):
 		if event == Events.PRINT_STARTED:
@@ -29,8 +30,17 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 			if self._repeat_timer != None:
 				self._repeat_timer.cancel()
 				self._repeat_timer = None
-			self._logger.info("Printing stopped. Detailed progress stopped.")
-			self._printer.commands("M117 Print Done")
+			if event == Events.PRINT_DONE:
+				currentData = self._printer.get_current_data()
+				hours = int(currentData["progress"]["printTime"]) / 3600
+				minutes = int(currentData["progress"]["printTime"] - hours * 3600) / 60
+				self._done_message = self._settings.get(["done_message"]).format(hours = hours, minutes= minutes,)
+				self._printer.commands("M117 {}".format(self._done_message))
+			elif event == Events.PRINT_CANCELLED:
+				self._printer.commands("M117 Print Cancelled")
+			elif event == Events.PRINT_FAILED:
+				self._printer.commands("M117 Print Failed")
+			self._logger.info("Printing stopped. Detailed progress stopped.")			
 		elif event == Events.CONNECTED:
 			self._connected_message = self._settings.get(["connected_message"])
 			self._printer.commands("M117 {}".format(self._connected_message))
@@ -125,6 +135,8 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 			],
 			eta_strftime = "%H %M %S Day %d",
 			etl_format = "{hours:02d}h{minutes:02d}m{seconds:02d}s",
+			connected_message = "Connected!",
+			done_message = "Print Done",
 			time_to_change = 10
 		)
 
