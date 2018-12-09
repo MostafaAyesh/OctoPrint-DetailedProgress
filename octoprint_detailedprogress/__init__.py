@@ -21,6 +21,7 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 			self._logger.info("Printing started. Detailed progress started.")
 			self._etl_format = self._settings.get(["etl_format"])
 			self._eta_strftime = self._settings.get(["eta_strftime"])
+			self._connected_message = self._settings.get(["connected_message"])
 			self._messages = self._settings.get(["messages"])
 			self._repeat_timer = octoprint.util.RepeatedTimer(self._settings.get_int(["time_to_change"]), self.do_work)
 			self._repeat_timer.start()
@@ -31,7 +32,7 @@ class DetailedProgressPlugin(octoprint.plugin.EventHandlerPlugin,
 			self._logger.info("Printing stopped. Detailed progress stopped.")
 			self._printer.commands("M117 Print Done")
 		elif event == Events.CONNECTED:
-			self._printer.commands("M117 Connected")
+			self._printer.commands("M117 {}".format(self._connected_message))
 
 	def do_work(self):
 		if not self._printer.is_printing():
